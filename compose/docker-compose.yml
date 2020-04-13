@@ -14,6 +14,7 @@ services:
       - /home/disk:/home/disk
     ports:
       - 3007:9000/tcp
+      - 9510:9510/tcp
     restart: always
     privileged: true
   nginx:
@@ -56,4 +57,21 @@ services:
       - /dev/log:/dev/log
     ports:
       - 3306:3306/tcp
+    restart: always
+  reserv-server:
+    container_name: reserv-server
+    image: docker.genee.in/genee/reserv-server:v0.8.1-d2019050501
+    volumes:
+      - ./reserv-server/config:/usr/src/app/config
+      - ./reserv-server/logs:/usr/src/app/logs
+    ports:
+      - 172.17.42.1:9898:9898/tcp
+      - 172.17.42.1:9899:9899/tcp
+      - 172.17.42.1:9509:9509/tcp
+    restart: always
+  beanstalkd:
+    container_name: beanstalkd
+    image: docker.genee.in/genee/beanstalkd:v1.10.0-d2017112401
+    ports:
+      - 172.17.42.1:11300:11300/tcp
     restart: always
