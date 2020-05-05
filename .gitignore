@@ -2,4 +2,4 @@
 .idea/
 compose/redis/lib/
 images/
-**/*.log
+*.log
