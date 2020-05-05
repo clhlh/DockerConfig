@@ -1,0 +1,5 @@
+.DS_Store
+.idea/
+compose/redis/lib/
+images/
+**/*.log

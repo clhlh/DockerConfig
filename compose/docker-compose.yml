@@ -1,0 +1,77 @@
+version: "3"
+services:
+  lims2:
+    container_name: lims2
+    image: lims2:local
+    volumes:
+      - /opt/lims2/volumes:/volumes
+      - /etc/sphinxsearch/conf.d:/etc/sphinxsearch/conf.d
+      - /etc/lims2:/etc/lims2
+      - /etc/msmtprc:/etc/msmtprc
+      - /var/run/genee-nodejs-ipc:/var/run/genee-nodejs-ipc
+      - /var/lib/lims2:/var/lib/lims2
+      - /var/lib/lims2_vidcam:/var/lib/lims2_vidcam
+      - /home/disk:/home/disk
+    ports:
+      - 3007:9000/tcp
+      - 9510:9510/tcp
+    restart: always
+    privileged: true
+  nginx:
+    container_name: nginx
+    image: nginx:1.11-alpine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/fastcgi_params:/etc/nginx/fastcgi_params
+      - ./nginx/sites-enabled:/etc/nginx/sites-enabled
+      - ./nginx/sites-available:/etc/nginx/sites-available
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - /var/log/nginx:/var/log/nginx
+      - /var/lib/lims2:/var/lib/lims2:rw
+      - /data/gini-modules:/data/gini-modules:rw
+      - /var/www:/var/www
+      - /var/run:/var/run
+    ports:
+      - 80:80/tcp
+    restart: always
+    privileged: true
+  redis:
+    container_name: redis
+    image: redis:local
+    volumes:
+      - ./redis/config/:/etc/redis
+      - ./redis/lib/:/var/lib/redis
+      - /dev/log/:/dev/log
+    ports:
+      - 172.17.42.1:6379:6379/tcp
+    restart: always
+  mariadb:
+    container_name: mariadb
+    image: mariadb:local
+    volumes:
+      - /var/lib/mysql:/var/lib/mysql
+      - /var/log/mysql:/var/log/mysql
+      - ./mariadb/my.cnf:/etc/mysql/my.cnf
+      - ./mariadb/conf.d/binlog.cnf:/etc/mysql/conf.d/binlog.cnf
+      - ./mariadb/conf.d/mysqld_safe_syslog.cnf:/etc/mysql/conf.d/mysqld_safe_syslog.cnf
+      - /dev/log:/dev/log
+    ports:
+      - 3306:3306/tcp
+    restart: always
+  reserv-server:
+    container_name: reserv-server
+    image: docker.genee.in/genee/reserv-server:v0.8.1-d2019050501
+    volumes:
+      - ./reserv-server/config:/usr/src/app/config
+      - ./reserv-server/logs:/usr/src/app/logs
+    ports:
+      - 172.17.42.1:9898:9898/tcp
+      - 172.17.42.1:9899:9899/tcp
+      - 172.17.42.1:9509:9509/tcp
+    restart: always
+  beanstalkd:
+    container_name: beanstalkd
+    image: docker.genee.in/genee/beanstalkd:v1.10.0-d2017112401
+    ports:
+      - 172.17.42.1:11300:11300/tcp
+    restart: always
